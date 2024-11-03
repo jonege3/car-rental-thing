@@ -72,35 +72,29 @@ def delete_employee(employee_id):
     return jsonify({"message": "Employee deleted successfully"})
 
 # Rental Endpoints
+
 @app.route('/order-car', methods=['POST'])
 def order_car():
     data = request.get_json()
-    customer_id = data['customer_id']
-    car_id = data['car_id']
-    # Check availability and order logic here
-    return jsonify({"message": "Car ordered successfully"})
+    response = Booking.order_car(data['customer_id'], data['car_id'])
+    return jsonify(response)
 
 @app.route('/cancel-order-car', methods=['POST'])
 def cancel_order_car():
     data = request.get_json()
-    customer_id = data['customer_id']
-    car_id = data['car_id']
-    # Cancel order logic here
-    return jsonify({"message": "Order canceled successfully"})
+    response = Booking.cancel_order(data['customer_id'], data['car_id'])
+    return jsonify(response)
 
 @app.route('/rent-car', methods=['POST'])
 def rent_car():
     data = request.get_json()
-    customer_id = data['customer_id']
-    car_id = data['car_id']
-    # Rent logic here
-    return jsonify({"message": "Car rented successfully"})
+    response = Booking.rent_car(data['customer_id'], data['car_id'])
+    return jsonify(response)
 
 @app.route('/return-car', methods=['POST'])
 def return_car():
     data = request.get_json()
-    customer_id = data['customer_id']
-    car_id = data['car_id']
-    status = data.get('status', 'available')
-    # Return logic here
-    return jsonify({"message": "Car returned successfully"})
+    response = Booking.return_car(data['customer_id'], data['car_id'], data['condition'])
+    return jsonify(response)
+
+

@@ -16,10 +16,10 @@ class Neo4jConnector:
         if self.driver:
             self.driver.close()
 
-    def query(self, query, parameters=None):
-        with self.driver.session() as session:
-            result = session.run(query, parameters)
-            return [record for record in result]
+    def run_query(query, params=None):
+		with driver.session() as session:
+			result = session.run(query, params or {})
+			return [record.data() for record in result]  # Ensure you're fetching data correctly
 
 # Create a Neo4j connection instance
 neo4j_connector = Neo4jConnector()
