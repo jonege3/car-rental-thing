@@ -1,17 +1,11 @@
 from flask import Flask
-from neo4j import GraphDatabase
-import os
+from app.neo4j_connector import neo4j_connector
 
 app = Flask(__name__)
 
-# Set up Neo4j connection
-uri = os.getenv("NEO4J_URI")
-user = os.getenv("NEO4J_USER")
-password = os.getenv("NEO4J_PASSWORD")
-driver = GraphDatabase.driver(uri, auth=(user, password))
+# Close Neo4j connection when app stops
+@app.teardown_appcontext
+def close_neo4j_connection(exception):
+    neo4j_connector.close()
 
-@app.route('/')
-def home():
-    return "Welcome to the Car Rental API"
-
-from app import routes
+from app import routes  # Import routes to register them with the app
