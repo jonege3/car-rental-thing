@@ -11,7 +11,6 @@ class Car:
         if result and result[0]:
             car_node = result[0]['c']
             return {
-                'id': car_node.id,
                 'make': car_node['make'],
                 'model': car_node['model'],
                 'year': car_node['year'],
@@ -27,7 +26,6 @@ class Car:
         if result and result[0]:
             car_node = result[0]['c']
             return {
-                'id': car_node.id,
                 'make': car_node['make'],
                 'model': car_node['model'],
                 'year': car_node['year'],
@@ -47,7 +45,6 @@ class Car:
         if result and result[0]:
             car_node = result[0]['c']
             return {
-                'id': car_node.id,
                 'make': car_node['make'],
                 'model': car_node['model'],
                 'year': car_node['year'],
@@ -62,6 +59,62 @@ class Car:
         run_query(query, {"car_id": car_id})
         return {'status': 'success', 'message': 'Car deleted successfully'}
 
+class Employee:
+    @staticmethod
+    def create_employee(name, position, salary, location):
+        query = """
+        CREATE (e:Employee {name: $name, position: $position, salary: $salary, location: $location})
+        RETURN e
+        """
+        result = run_query(query, {"name": name, "position": position, "salary": salary, "location": location})
+        if result and result[0]:
+            employee_node = result[0]['e']
+            return {
+                'name': employee_node['name'],
+                'position': employee_node['position'],
+                'salary': employee_node['salary'],
+                'location': employee_node['location'],
+            }
+        return None
+
+    @staticmethod
+    def read_employee(employee_id):
+        query = "MATCH (e:Employee) WHERE ID(e) = $employee_id RETURN e"
+        result = run_query(query, {"employee_id": employee_id})
+        if result and result[0]:
+            employee_node = result[0]['e']
+            return {
+                'name': employee_node['name'],
+                'position': employee_node['position'],
+                'salary': employee_node['salary'],
+                'location': employee_node['location'],
+            }
+        return None
+
+    @staticmethod
+    def update_employee_salary(employee_id, salary):
+        query = """
+        MATCH (e:Employee) WHERE ID(e) = $employee_id
+        SET e.salary = $salary
+        RETURN e
+        """
+        result = run_query(query, {"employee_id": employee_id, "salary": salary})
+        if result and result[0]:
+            employee_node = result[0]['e']
+            return {
+                'name': employee_node['name'],
+                'position': employee_node['position'],
+                'salary': employee_node['salary'],
+                'location': employee_node['location'],
+            }
+        return None
+
+    @staticmethod
+    def delete_employee(employee_id):
+        query = "MATCH (e:Employee) WHERE ID(e) = $employee_id DETACH DELETE e"
+        run_query(query, {"employee_id": employee_id})
+        return {'status': 'success', 'message': 'Employee deleted successfully'}
+
 class Customer:
     @staticmethod
     def create_customer(name, age, address):
@@ -73,7 +126,6 @@ class Customer:
         if result and result[0]:
             customer_node = result[0]['c']
             return {
-                'id': customer_node.id,
                 'name': customer_node['name'],
                 'age': customer_node['age'],
                 'address': customer_node['address'],
@@ -87,7 +139,6 @@ class Customer:
         if result and result[0]:
             customer_node = result[0]['c']
             return {
-                'id': customer_node.id,
                 'name': customer_node['name'],
                 'age': customer_node['age'],
                 'address': customer_node['address'],
@@ -107,7 +158,6 @@ class Customer:
         if result and result[0]:
             customer_node = result[0]['c']
             return {
-                'id': customer_node.id,
                 'name': customer_node['name'],
                 'age': customer_node['age'],
                 'address': customer_node['address'],
@@ -119,142 +169,3 @@ class Customer:
         query = "MATCH (c:Customer) WHERE ID(c) = $customer_id DETACH DELETE c"
         run_query(query, {"customer_id": customer_id})
         return {'status': 'success', 'message': 'Customer deleted successfully'}
-
-class Employee:
-    @staticmethod
-    def create_employee(name, address, branch):
-        query = """
-        CREATE (e:Employee {name: $name, address: $address, branch: $branch})
-        RETURN e
-        """
-        result = run_query(query, {"name": name, "address": address, "branch": branch})
-        if result and result[0]:
-            employee_node = result[0]['e']
-            return {
-                'id': employee_node.id,
-                'name': employee_node['name'],
-                'address': employee_node['address'],
-                'branch': employee_node['branch'],
-            }
-        return None
-
-    @staticmethod
-    def read_employee(employee_id):
-        query = "MATCH (e:Employee) WHERE ID(e) = $employee_id RETURN e"
-        result = run_query(query, {"employee_id": employee_id})
-        if result and result[0]:
-            employee_node = result[0]['e']
-            return {
-                'id': employee_node.id,
-                'name': employee_node['name'],
-                'address': employee_node['address'],
-                'branch': employee_node['branch'],
-            }
-        return None
-
-    @staticmethod
-    def update_employee(employee_id, **kwargs):
-        updates = ', '.join(f"e.{key} = ${key}" for key in kwargs)
-        query = f"""
-        MATCH (e:Employee) WHERE ID(e) = $employee_id
-        SET {updates}
-        RETURN e
-        """
-        params = {"employee_id": employee_id, **kwargs}
-        result = run_query(query, params)
-        if result and result[0]:
-            employee_node = result[0]['e']
-            return {
-                'id': employee_node.id,
-                'name': employee_node['name'],
-                'address': employee_node['address'],
-                'branch': employee_node['branch'],
-            }
-        return None
-
-    @staticmethod
-    def delete_employee(employee_id):
-        query = "MATCH (e:Employee) WHERE ID(e) = $employee_id DETACH DELETE e"
-        run_query(query, {"employee_id": employee_id})
-        return {'status': 'success', 'message': 'Employee deleted successfully'}
-
-class Rental:
-    @staticmethod
-    def create_rental(car_id, customer_id, rental_date, return_date):
-        # Update the car status to 'rented'
-        Car.update_car_status(car_id, "rented")
-
-        query = """
-        MATCH (c:Car), (cu:Customer)
-        WHERE ID(c) = $car_id AND ID(cu) = $customer_id
-        CREATE (cu)-[r:RENTED {rental_date: $rental_date, return_date: $return_date}]->(c)
-        RETURN r
-        """
-        result = run_query(query, {"car_id": car_id, "customer_id": customer_id, "rental_date": rental_date, "return_date": return_date})
-        return result
-
-    @staticmethod
-    def read_rental(rental_id):
-        query = "MATCH (cu:Customer)-[r:RENTED]->(c:Car) WHERE ID(r) = $rental_id RETURN cu, r, c"
-        result = run_query(query, {"rental_id": rental_id})
-        if result and result[0]:
-            rental_info = result[0]
-            return {
-                'customer': {
-                    'id': rental_info['cu'].id,
-                    'name': rental_info['cu']['name']
-                },
-                'car': {
-                    'id': rental_info['c'].id,
-                    'make': rental_info['c']['make'],
-                    'model': rental_info['c']['model']
-                },
-                'rental_details': {
-                    'rental_date': rental_info['r']['rental_date'],
-                    'return_date': rental_info['r']['return_date']
-                }
-            }
-        return None
-
-    @staticmethod
-    def update_rental(rental_id, **kwargs):
-        updates = ', '.join(f"r.{key} = ${key}" for key in kwargs)
-        query = f"""
-        MATCH ()-[r:RENTED]->()
-        WHERE ID(r) = $rental_id
-        SET {updates}
-        RETURN r
-        """
-        params = {"rental_id": rental_id, **kwargs}
-        result = run_query(query, params)
-        if result and result[0]:
-            rental_node = result[0]['r']
-            return {
-                'id': rental_node.id,
-                'rental_date': rental_node['rental_date'],
-                'return_date': rental_node['return_date'],
-            }
-        return None
-
-    @staticmethod
-    def delete_rental(rental_id):
-        # First, find the rental details to get the associated car ID
-        query = """
-        MATCH ()-[r:RENTED]->(c:Car)
-        WHERE ID(r) = $rental_id
-        RETURN ID(c) AS car_id
-        """
-        car_id_result = run_query(query, {"rental_id": rental_id})
-        if car_id_result and car_id_result[0]:
-            car_id = car_id_result[0]['car_id']
-
-            # Delete the rental relationship
-            delete_query = "MATCH ()-[r:RENTED]->() WHERE ID(r) = $rental_id DELETE r"
-            run_query(delete_query, {"rental_id": rental_id})
-
-            # Update the car status back to 'available'
-            Car.update_car_status(car_id, "available")
-
-            return {'status': 'success', 'message': 'Rental deleted successfully and car status updated to available'}
-        return {'status': 'error', 'message': 'Rental not found'}
-
